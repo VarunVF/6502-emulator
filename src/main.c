@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
     CPU cpu;
     init_cpu(&cpu);
 
-    // LDA $255, BRK
+    // LDA #255, BRK
     uint8_t program[] = {
         0xA9, 0xFF, 0x00
     };
