@@ -7,6 +7,10 @@
 void init_cpu(CPU *cpu)
 {
     memset(cpu, 0, sizeof(CPU));
+
+    cpu->PC = 0x8000;   // Start execution at $8000
+    cpu->SP = 0xFF;     // Stack starts at $01FF
+    cpu->SR = FLAG_INTERRUPT | FLAG_UNUSED;  // Default flags
 }
 
 void print_state(CPU *cpu)
@@ -21,12 +25,10 @@ void print_state(CPU *cpu)
 
 uint8_t read_memory(CPU *cpu, uint16_t address)
 {
-    // TODO: bounds check
     return cpu->memory[address];
 }
 
 void write_memory(CPU *cpu, uint16_t address, uint8_t value)
 {
-    // TODO: bounds check
     cpu->memory[address] = value;
 }

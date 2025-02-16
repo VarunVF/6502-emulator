@@ -10,16 +10,17 @@
 // Model of the NES 6502
 typedef struct CPU
 {
-    uint8_t A;
-    uint8_t X;
-    uint8_t Y;
-    uint16_t PC;
-    uint8_t SP;
-    uint8_t SR;
-    uint8_t memory[MEMORY_SIZE];
+    uint8_t A;      // Accumulator
+    uint8_t X;      // X Register
+    uint8_t Y;      // Y Register
+    uint16_t PC;    // Program Counter
+    uint8_t SP;     // Stack Pointer
+    uint8_t SR;     // Status Register (Flags)
+    uint8_t memory[MEMORY_SIZE];  // RAM
 } CPU;
 
 
+// Status Register flags
 #define FLAG_CARRY      0x01
 #define FLAG_ZERO       0x02
 #define FLAG_INTERRUPT  0x04
