@@ -33,10 +33,15 @@ typedef struct CPU
 
 void init_cpu(CPU* cpu);
 
+void print_state(CPU* cpu);
+
 uint8_t read_memory(CPU* cpu, uint16_t address);
 void write_memory(CPU* cpu, uint16_t address, uint8_t value);
 
-void print_state(CPU* cpu);
+void load_program(CPU* cpu, uint8_t* program, uint16_t size, uint16_t start_address);
+void execute_instruction(CPU* cpu);
+void run_cpu(CPU* cpu);
+
 
 
 #endif /* CPU_H */

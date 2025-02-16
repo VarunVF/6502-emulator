@@ -7,12 +7,15 @@ int main(int argc, char* argv[])
 {
     CPU cpu;
     init_cpu(&cpu);
-    
-    uint16_t address = (uint16_t)1;
-    uint8_t value = read_memory(&cpu, address);
-    
-    printf("Memory read at address %i: %i\n", address, value);
-    print_state(&cpu);
 
+    // LDA $255, BRK
+    uint8_t program[] = {
+        0xA9, 0xFF, 0x00
+    };
+
+    load_program(&cpu, program, sizeof(program), 0x8000);
+    run_cpu(&cpu);
+
+    print_state(&cpu);
     return 0;
 }

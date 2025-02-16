@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "cpu.h"
+#include "instructions.h"
 
 
-void init_cpu(CPU *cpu)
+void init_cpu(CPU* cpu)
 {
     memset(cpu, 0, sizeof(CPU));
 
@@ -13,7 +15,7 @@ void init_cpu(CPU *cpu)
     cpu->SR = FLAG_INTERRUPT | FLAG_UNUSED;  // Default flags
 }
 
-void print_state(CPU *cpu)
+void print_state(CPU* cpu)
 {
     printf( "A:\t0x%02x\t(%i)\n", cpu->A,  cpu->A);
     printf( "X:\t0x%02x\t(%i)\n", cpu->X,  cpu->X);
@@ -23,12 +25,50 @@ void print_state(CPU *cpu)
     printf("SR:\t0x%02x\t(%i)\n", cpu->SR, cpu->SR);
 }
 
-uint8_t read_memory(CPU *cpu, uint16_t address)
+uint8_t read_memory(CPU* cpu, uint16_t address)
 {
     return cpu->memory[address];
 }
 
-void write_memory(CPU *cpu, uint16_t address, uint8_t value)
+void write_memory(CPU* cpu, uint16_t address, uint8_t value)
 {
     cpu->memory[address] = value;
+}
+
+void load_program(CPU* cpu, uint8_t* program, uint16_t size, uint16_t start_address)
+{
+    // Ensure the program can fit in memory
+    uint16_t max_program_size = (1 << 16) - start_address;
+    if (size > max_program_size)
+    {
+        fprintf(stderr, "Error: Program is too large to fit in memory.\n");
+        return;
+    }
+    
+    memcpy(cpu->memory + start_address, program, size);
+    cpu->PC = start_address;  // Set PC to start of program
+}
+
+void execute_instruction(CPU* cpu)
+{
+    // Fetch
+    uint8_t opcode = read_memory(cpu, cpu->PC++);
+
+    // Decode and execute
+    switch (opcode)
+    {
+        case 0xA9:
+            LDA_imm(cpu);
+            break;
+        default:
+            printf("Unknown opcode: 0x%02x\n", opcode);
+            print_state(cpu);
+            exit(1);
+    }
+}
+
+void run_cpu(CPU* cpu)
+{
+    while (1)
+        execute_instruction(cpu);
 }
