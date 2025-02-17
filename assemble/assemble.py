@@ -1,8 +1,8 @@
 import argparse
-import re
 
-from bin_file_io import read_binary, write_binary
+from bin_file_io import write_binary
 from opcodes import opcode_map
+from parsing import read_lines, parse_line
 
 
 def get_args():
@@ -13,33 +13,7 @@ def get_args():
     parser.add_argument('--output_file', '-o', help='path to write binary output', default='out.bin')
     parser.add_argument('--print-bytes', '-p', help='print out the resulting machine code bytes', action='store_true')
     parser.add_argument('--debug', '-d', help='print debugging information', action='store_true')
-    args = parser.parse_args()
-    return args
-
-
-def read_lines(input_file: str) -> list[str]:
-    source = read_binary(input_file)
-    return source.splitlines()
-
-
-def parse_line(line: str) -> tuple[str, str]:
-    line = line.split(';')[0]  # Remove comment
-    line = line.strip()  # Remove whitespace
-    
-    # Match mnemonics and operand
-    regex_match = re.match(r'([a-zA-Z]+)[ \t]+(\S+)', line)
-    if regex_match:
-        mnemonic = regex_match.group(1)
-        operand = regex_match.group(2)
-        return mnemonic, operand
-    
-    # Otherwise, match mnemonic without operand
-    regex_match = re.match(r'([a-zA-Z]+)', line)
-    if regex_match:
-        mnemonic = regex_match.group(1)
-        return mnemonic, None
-    
-    return None, None
+    return parser.parse_args()
 
 
 def prefixed_to_decimal(arg: str):
