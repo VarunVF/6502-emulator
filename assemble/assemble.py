@@ -77,15 +77,16 @@ def to_machine_code(mnemonic: str, operand: str, do_debug: bool = False):
 def assemble(input_file: str, output_file: str, do_debug: bool = False):
     if do_debug:
         print(f'Assembling from {input_file} and writing to {output_file}')
+        print()
 
     machine_code_decimal = []
     
     lines = read_lines(input_file)
-    for line in lines:
+    for idx, line in enumerate(lines):
         inst, operand = parse_line(line)
         
         if do_debug:
-            print(f'Current line:\t{line}')
+            print(f'Current line:\t{idx + 1}| {line}')
             print(f'Found operation \'{inst}\', operand \'{operand}\'')
         
         # No instruction found: full line was a comment
@@ -94,6 +95,10 @@ def assemble(input_file: str, output_file: str, do_debug: bool = False):
             continue
         
         codes = to_machine_code(inst, operand, do_debug)
+        if do_debug:
+            print(f'Converted to machine code: {bytes(codes)}')
+            print()
+        
         machine_code_decimal.extend(codes)
     
     machine_code = bytes(machine_code_decimal)
@@ -106,6 +111,7 @@ def main():
     code = assemble(args.input_file, args.output_file, args.debug)
     
     if args.print_bytes:
+        print('Full machine code:')
         print(code)
 
 
