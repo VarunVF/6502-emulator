@@ -75,16 +75,19 @@ def to_machine_code(mnemonic: str, operand: str, do_debug: bool = False):
 
 
 def assemble(input_file: str, output_file: str, do_debug: bool = False):
+    if do_debug:
+        print(f'Assembling from {input_file} and writing to {output_file}')
+
     machine_code_decimal = []
     
     lines = read_lines(input_file)
     for line in lines:
-        if do_debug:
-            print('Current line:\t', line)
-        
         inst, operand = parse_line(line)
+        
         if do_debug:
+            print(f'Current line:\t{line}')
             print(f'Found operation \'{inst}\', operand \'{operand}\'')
+        
         if inst is None or operand is None:
             continue
         
@@ -98,9 +101,6 @@ def assemble(input_file: str, output_file: str, do_debug: bool = False):
     
 def main():
     args = get_args()
-    if (args.debug):
-        print(f'Assembling from {args.input_file} and writing to {args.output_file}')
-    
     code = assemble(args.input_file, args.output_file, args.debug)
     
     if args.print_bytes:
