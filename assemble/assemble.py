@@ -65,7 +65,11 @@ def to_machine_code(mnemonic: str, operand: str, do_debug: bool = False):
 
     elif operand.startswith('$'):
         # Absolute mode, operand in hex
-        raise NotImplementedError(f'Absolute mode is not yet implemented.')
+        mode = 'absolute'
+        debug_addr_mode(mode, do_debug)
+        value = prefixed_to_decimal(operand)
+        ensure_addressing_mode(op, mode)
+        return [op[mode], value]
     else:
         raise ValueError(f'Unknown operand format: {operand}')
 
