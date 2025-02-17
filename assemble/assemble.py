@@ -88,7 +88,9 @@ def assemble(input_file: str, output_file: str, do_debug: bool = False):
             print(f'Current line:\t{line}')
             print(f'Found operation \'{inst}\', operand \'{operand}\'')
         
-        if inst is None or operand is None:
+        # No instruction found: full line was a comment
+        if inst is None:
+            print()
             continue
         
         codes = to_machine_code(inst, operand, do_debug)
