@@ -1,10 +1,10 @@
 import re
 
-from bin_file_io import read_binary
+from io_funcs import read_source
 
 
 def read_lines(input_file: str) -> list[str]:
-    source = read_binary(input_file)
+    source = read_source(input_file)
     return source.splitlines()
 
 

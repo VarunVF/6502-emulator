@@ -1,6 +1,6 @@
 import argparse
 
-from bin_file_io import write_binary
+from io_funcs import write_binary, print_hex, print_debug_info
 from opcodes import opcode_map
 from parsing import read_lines, parse_line
 
@@ -16,18 +16,21 @@ def get_args():
     return parser.parse_args()
 
 
-def prefixed_to_decimal(arg: str):
-    if arg.startswith('%'):
+def prefixed_to_decimal(arg: str) -> int:
+    if len(arg) == 0:
+        raise ValueError('Empty numeric literal')
+    
+    if arg.startswith('%') and len(arg) > 1:
         return int(arg[1:], 2)  # binary
-    elif arg.startswith('$'):
+    elif arg.startswith('$') and len(arg) > 1:
         return int(arg[1:], 16)  # hexadecimal
     elif arg.isdigit():
         return int(arg, 10)  # decimal
     else:
         raise ValueError(f'Unknown prefix for operand: {arg[0]}')
-    
 
-def to_machine_code(mnemonic: str, operand: str, do_debug: bool = False):
+
+def to_machine_code(mnemonic: str, operand: str):
     mnemonic = mnemonic.upper()
     
     if mnemonic not in opcode_map:
@@ -35,41 +38,39 @@ def to_machine_code(mnemonic: str, operand: str, do_debug: bool = False):
     
     def ensure_addressing_mode(op, mode: str):
         if mode not in op.keys():
-            raise KeyError(f'Opcode {operand} does not support {mode} mode')
-    
-    def debug_addr_mode(mode: str, do_debug: bool):
-        if do_debug:
-            print(f'Using {mode} addressing mode')
+            raise KeyError(f'Instruction {mnemonic} does not support {mode} mode. '
+                           f'Supported modes are {list(op.keys())}')
     
     op = opcode_map[mnemonic]
     
     if not operand:
         mode = 'implied'
-        debug_addr_mode(mode, do_debug)
         ensure_addressing_mode(op, mode)
-        return [op[mode]]
+        return [op[mode]], mode
     
-    if operand.startswith('#'):
+    elif operand.startswith('#'):
         mode = 'immediate'
-        debug_addr_mode(mode, do_debug)
         value = prefixed_to_decimal(operand[1:])
         ensure_addressing_mode(op, mode)
-        return [op[mode], value]
+        return [op[mode], value], mode
 
     elif operand.startswith('$') and len(operand) == 3:
+        # Zero Page mode, operand in hex
         mode = 'zero_page'
-        debug_addr_mode(mode, do_debug)
         value = prefixed_to_decimal(operand)
         ensure_addressing_mode(op, mode)
-        return [op[mode], value]
+        return [op[mode], value], mode
 
-    elif operand.startswith('$'):
+    elif operand.startswith('$') and len(operand) == 5:
         # Absolute mode, operand in hex
         mode = 'absolute'
-        debug_addr_mode(mode, do_debug)
         value = prefixed_to_decimal(operand)
         ensure_addressing_mode(op, mode)
-        return [op[mode], value]
+        return [op[mode], lo_byte, hi_byte], mode
+    
+    elif operand.startswith('$'):
+        raise ValueError(f'Invalid address: {operand}')
+    
     else:
         raise ValueError(f'Unknown operand format: {operand}')
 
@@ -84,35 +85,27 @@ def assemble(input_file: str, output_file: str, do_debug: bool = False):
     lines = read_lines(input_file)
     for idx, line in enumerate(lines):
         inst, operand = parse_line(line)
+        codes = []
+        
+        if inst is not None:
+            codes, mode = to_machine_code(inst, operand)
+            machine_code_decimal.extend(codes)
         
         if do_debug:
-            print(f'Current line:\t{idx + 1}| {line}')
-            print(f'Found operation \'{inst}\', operand \'{operand}\'')
-        
-        # No instruction found: full line was a comment
-        if inst is None:
-            print()
-            continue
-        
-        codes = to_machine_code(inst, operand, do_debug)
-        if do_debug:
-            print(f'Converted to machine code: {bytes(codes)}')
-            print()
-        
-        machine_code_decimal.extend(codes)
+            print_debug_info(idx, line, inst, operand, mode, codes)
     
     machine_code = bytes(machine_code_decimal)
     write_binary(output_file, machine_code)
     return machine_code
 
-    
+
 def main():
     args = get_args()
     code = assemble(args.input_file, args.output_file, args.debug)
     
     if args.print_bytes:
         print('Full machine code:')
-        print(code)
+        print_hex(code)
 
 
 if __name__ == '__main__':
