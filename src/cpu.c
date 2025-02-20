@@ -17,12 +17,13 @@ void init_cpu(CPU* cpu)
 
 void print_state(CPU* cpu)
 {
-    printf( "A:\t0x%02x\t(%i)\n", cpu->A,  cpu->A);
-    printf( "X:\t0x%02x\t(%i)\n", cpu->X,  cpu->X);
-    printf( "Y:\t0x%02x\t(%i)\n", cpu->Y,  cpu->Y);
-    printf("PC:\t0x%04x\t(%i)\n", cpu->PC, cpu->PC);
-    printf("SP:\t0x%02x\t(%i)\n", cpu->SP, cpu->SP);
-    printf("SR:\t0x%02x\t(%i)\n", cpu->SR, cpu->SR);
+    printf("CPU State:\n");
+    printf("\t A:\t0x%02x\t(%i)\n", cpu->A,  cpu->A);
+    printf("\t X:\t0x%02x\t(%i)\n", cpu->X,  cpu->X);
+    printf("\t Y:\t0x%02x\t(%i)\n", cpu->Y,  cpu->Y);
+    printf("\tPC:\t0x%04x\t(%i) -> 0x%02x\n", cpu->PC, cpu->PC, cpu->memory[cpu->PC]);
+    printf("\tSP:\t0x%02x\t(%i)\n", cpu->SP, cpu->SP);
+    printf("\tSR:\t0x%02x\t(%i)\n", cpu->SR, cpu->SR);
 }
 
 uint8_t read_memory(CPU* cpu, uint16_t address)
