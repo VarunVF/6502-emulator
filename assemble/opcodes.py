@@ -18,10 +18,10 @@ opcode_map = {
     'SBC': {'immediate': 0xE9, 'zero_page': 0xE5, 'absolute': 0xED},  # Subtract with carry
     'INC': {'zero_page': 0xE6, 'absolute': 0xEE},
     'DEC': {'zero_page': 0xC6, 'absolute': 0xCE},
-    'INX': {'implied:': 0xE8},
-    'DEX': {'implied:': 0xCA},
-    'INY': {'implied:': 0xC8},
-    'DEY': {'implied:': 0x88},
+    'INX': {'implied': 0xE8},
+    'DEX': {'implied': 0xCA},
+    'INY': {'implied': 0xC8},
+    'DEY': {'implied': 0x88},
     
     # Shift
     'ASL': {'zero_page': 0x06, 'absolute': 0x0E},  # Arithmetic Shift Left
