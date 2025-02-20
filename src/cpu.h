@@ -2,6 +2,7 @@
 #define CPU_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // Total size of RAM (65536 bytes)
 #define MEMORY_SIZE (1 << 16)
@@ -10,6 +11,7 @@
 // Model of the NES 6502
 typedef struct CPU
 {
+    bool should_halt;
     uint8_t A;      // Accumulator
     uint8_t X;      // X Register
     uint8_t Y;      // Y Register

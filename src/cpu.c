@@ -60,8 +60,14 @@ void execute_instruction(CPU* cpu)
         case 0xA9:
             LDA_imm(cpu);
             break;
+        case 0x8D:
+            STA_abs(cpu);
+            break;
+        case 0x00:
+            BRK(cpu);
+            break;
         default:
-            printf("Unknown opcode: 0x%02x\n", opcode);
+            fprintf(stderr, "Unknown opcode: 0x%02x\n", opcode);
             print_state(cpu);
             exit(1);
     }
@@ -69,6 +75,8 @@ void execute_instruction(CPU* cpu)
 
 void run_cpu(CPU* cpu)
 {
-    while (1)
+    while (!cpu->should_halt)
         execute_instruction(cpu);
+    
+    printf("Encountered BRK instruction, halting execution.\n");
 }
