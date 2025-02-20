@@ -30,6 +30,17 @@ def prefixed_to_decimal(arg: str) -> int:
         raise ValueError(f'Unknown prefix for operand: {arg[0]}')
 
 
+def lo_hi_split(number: int) -> tuple[int, int]:
+    """Split a 16-bit number into its low and high bytes."""
+    
+    if number.bit_length() > 16:
+        raise ValueError(f'Number does not fit in 16 bits: {number}')
+    
+    lo = number & 0x00ff
+    hi = number >> 8
+    return lo, hi
+
+
 def to_machine_code(mnemonic: str, operand: str):
     mnemonic = mnemonic.upper()
     
@@ -65,6 +76,8 @@ def to_machine_code(mnemonic: str, operand: str):
         # Absolute mode, operand in hex
         mode = 'absolute'
         value = prefixed_to_decimal(operand)
+        # Address in low-byte, high-byte order (LLHH)
+        lo_byte, hi_byte = lo_hi_split(value)
         ensure_addressing_mode(op, mode)
         return [op[mode], lo_byte, hi_byte], mode
     
