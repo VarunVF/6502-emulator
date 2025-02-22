@@ -1,6 +1,7 @@
 import argparse
 
-from io_funcs import write_binary, print_hex, print_debug_info
+from io_funcs import write_binary, print_hex
+from io_funcs import debug_line, debug_op, debug_mode, debug_code, debug_skip_reason
 from opcodes import opcode_map
 from parsing import read_lines, parse_line
 
@@ -100,23 +101,42 @@ def to_machine_code(mnemonic: str, operand: str):
 
 
 def assemble(input_file: str, output_file: str, do_debug: bool = False):
-    if do_debug:
-        print(f'Assembling from {input_file} and writing to {output_file}')
-        print()
-
     machine_code_decimal = []
     
     lines = read_lines(input_file)
     for idx, line in enumerate(lines):
         inst, operand = parse_line(line)
+        if do_debug:
+            debug_line(idx + 1, line)
+            debug_op(inst, operand)
+
         codes = []
         
         if inst is not None:
             codes, mode = to_machine_code(inst, operand)
+            if do_debug:
+                debug_mode(mode)
+                debug_code(codes)
             machine_code_decimal.extend(codes)
-        
+        else:
+            # Didn't find an instruction
+            reason = 'unknown'
+            if line == '':
+                reason = 'empty'
+            elif line.startswith(';'):
+                reason = 'comment'
+            else:
+                padding = len(repr(idx + 1)) + 2
+                raise SyntaxError(
+                    f'Invalid syntax:\n'
+                    + f'{idx + 1}| {line}\n'
+                    + ' '*padding + '^'*len(line)
+                )
+            if do_debug:
+                debug_skip_reason(line, reason)
+    
         if do_debug:
-            print_debug_info(idx, line, inst, operand, mode, codes)
+            print()
     
     machine_code = bytes(machine_code_decimal)
     write_binary(output_file, machine_code)

@@ -18,18 +18,22 @@ def print_hex(hex_codes: bytes):
     print()
 
 
-def print_debug_info(line_idx, line, instruction, operand, mode, line_codes):
-    line_number = line_idx + 1
-    
+def debug_line(line_number, line):
     print(f'Current line:\t{line_number}| {line}')
+
+
+def debug_op(instruction, operand):
     print(f'Found operation \'{instruction}\', operand \'{operand}\'')
-    
-    if instruction is not None:
-        print(f'Using {mode} addressing mode')
-        print('Converted to machine code: ', end='')
-        print_hex(bytes(line_codes))
-    else:
-        reason = 'empty' if line == '' else 'comment'
-        print(f'Skipping (line is {reason})')
-    
-    print()
+
+
+def debug_mode(mode):
+    print(f'Using {mode} addressing mode')
+
+
+def debug_code(line_codes):
+    print('Converted to machine code: ', end='')
+    print_hex(bytes(line_codes))
+
+
+def debug_skip_reason(line, reason):
+    print(f'Skipping line (Reason: {reason})')
