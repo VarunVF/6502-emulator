@@ -4,6 +4,7 @@ from io_funcs import write_binary, print_hex
 from io_funcs import debug_line, debug_op, debug_mode, debug_code, debug_skip_reason
 from opcodes import opcode_map
 from parsing import read_lines, parse_line
+from parsing import parse_macro_def, parse_macro_end, parse_macro_invoke
 
 
 def get_args():
@@ -144,9 +145,62 @@ def assemble(input_file: str, output_file: str, do_debug: bool = False):
     return machine_code
 
 
+def preprocess(input_file: str, processed_file: str, do_debug: bool = False):
+    macros = dict()
+    
+    lines = read_lines(input_file)
+    for i in range(len(lines)):
+        lines[i] = lines[i].split(';')[0]
+        lines[i] = lines[i].strip()
+    
+    idx = 0
+    while idx < len(lines):
+        macro_name = parse_macro_def(lines[idx])
+        if macro_name is not None:
+            lines[idx] = ''  # Remove macro def
+            idx += 1  # Advance past the @macro line
+            macros[macro_name] = []
+            if do_debug:
+                print(f'Macro definition: {macro_name}')
+            while idx < len(lines) and not parse_macro_end(lines[idx]):
+                macros[macro_name].append(lines[idx])
+                if do_debug:
+                    print(f'Add to macro {macro_name}: {lines[idx]}')
+                lines[idx] = ''  # Remove macro body
+                idx += 1
+                continue
+            if parse_macro_end(lines[idx]):
+                lines[idx] = ''  # Remove macro end
+                if do_debug:
+                    print(f'End of macro.')
+        
+        invoked_macro = parse_macro_invoke(lines[idx])
+        if invoked_macro is not None:
+            lines[idx] = '\n'.join(macros[invoked_macro])
+        
+        idx += 1
+
+    processed = '\n'.join(lines)
+    with open(processed_file, 'w') as f:
+        f.write(processed)
+
+
 def main():
     args = get_args()
-    code = assemble(args.input_file, args.output_file, args.debug)
+    
+    if args.debug:
+        print(f'Assembling from {args.input_file} and writing to {args.output_file}')
+        print()
+        print('Preprocessing...')
+
+    preprocessed_file = f'p_{args.input_file}'
+    preprocess(args.input_file, preprocessed_file, args.debug)
+    
+    if args.debug:
+        print()
+        print('Assembling...')
+    
+    code = assemble(preprocessed_file, args.output_file, args.debug)
     
     if args.print_bytes:
         print('Full machine code:')
