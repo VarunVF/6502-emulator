@@ -54,6 +54,17 @@ def to_machine_code(mnemonic: str, operand: str):
     
     op = opcode_map[mnemonic]
     
+    # Special case for BRK: considered a 2-byte instruction
+    if mnemonic == 'BRK':
+        if not operand:
+            print('Warning: BRK not accompanied by signature byte. Inserting 0x00 as operand')
+            mode = 'implied'
+            operand = 0x00
+        else:
+            mode = 'immediate'
+        ensure_addressing_mode(op, mode)
+        return [op[mode], operand], mode
+    
     if not operand:
         mode = 'implied'
         ensure_addressing_mode(op, mode)
