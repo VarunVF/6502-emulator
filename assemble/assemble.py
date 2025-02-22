@@ -60,11 +60,12 @@ def to_machine_code(mnemonic: str, operand: str):
         if not operand:
             print('Warning: BRK not accompanied by signature byte. Inserting 0x00 as operand')
             mode = 'implied'
-            operand = 0x00
+            signature = 0x00
         else:
             mode = 'immediate'
+            signature = prefixed_to_decimal(operand[1:])
         ensure_addressing_mode(op, mode)
-        return [op[mode], operand], mode
+        return [op[mode], signature], mode
     
     if not operand:
         mode = 'implied'
