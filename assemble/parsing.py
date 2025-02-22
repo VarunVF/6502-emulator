@@ -26,3 +26,30 @@ def parse_line(line: str) -> tuple[str, str]:
         return mnemonic, None
     
     return None, None
+
+
+def parse_macro_def(line: str) -> str:
+    regex_match = re.match(r'@macro[ \t]+([a-zA-Z_]\w+)', line)
+    if regex_match:
+        macro_name = regex_match.group(1)
+        return macro_name
+    return None
+
+
+def parse_macro_end(line: str) -> bool:
+    regex_match = re.match(r'^\s*@endmacro\s*$', line)
+    if regex_match:
+        return True
+    return False
+
+
+def parse_macro_invoke(line: str) -> str:
+    regex_match = re.match(r'@([a-zA-Z_]\w+)', line)
+    if regex_match:
+        macro_name = regex_match.group(1)
+    else:
+        macro_name = None
+    
+    if macro_name == 'endmacro':
+        return None
+    return macro_name
