@@ -5,20 +5,19 @@
 
 int main(int argc, char* argv[])
 {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s program_file\n", argv[0]);
+        fprintf(stderr, "Argument input_file is required\n");
+        return 1;
+    }
+
     CPU cpu;
     init_cpu(&cpu);
-
-    // LDA #255, STA $1200, BRK
-    uint8_t program[] = {
-        0xA9, 0xFF, 0x8D, 0x00, 0x12, 0x00
-    };
-
-    load_program(&cpu, program, sizeof(program), 0x8000);
+    
+    load_program_file(&cpu, argv[1], 0x8000);
     run_cpu(&cpu);
-
+    
     print_state(&cpu);
-    uint8_t valA = read_memory(&cpu, 0x1200);
-    printf("Value at $1200: %i", valA);
     
     return 0;
 }

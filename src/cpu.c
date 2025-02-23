@@ -23,7 +23,15 @@ void print_state(CPU* cpu)
     printf("\t Y:\t0x%02x\t(%i)\n", cpu->Y,  cpu->Y);
     printf("\tPC:\t0x%04x\t(%i) -> 0x%02x\n", cpu->PC, cpu->PC, cpu->memory[cpu->PC]);
     printf("\tSP:\t0x%02x\t(%i)\n", cpu->SP, cpu->SP);
-    printf("\tSR:\t0x%02x\t(%i)\n", cpu->SR, cpu->SR);
+    
+    printf("\tSR:\t0x%02x\t(0b", cpu->SR);
+    for (int i = 0; i < 8; i++) {
+        if (cpu->SR & (1 << i))
+            printf("1");
+        else
+            printf("0");
+    }
+    printf(")\n");
 }
 
 uint8_t read_memory(CPU* cpu, uint16_t address)
@@ -50,6 +58,38 @@ void load_program(CPU* cpu, uint8_t* program, uint16_t size, uint16_t start_addr
     cpu->PC = start_address;  // Set PC to start of program
 }
 
+void load_program_file(CPU* cpu, char* filename, uint16_t start_address)
+{
+    // Open file for reading, binary mode
+    FILE* fd = fopen(filename, "rb");
+    if (fd == NULL) {
+        fprintf(stderr, "Error loading program file!\n");
+        exit(1);
+    }
+
+    // Find program size
+    fseek(fd, 0, SEEK_END);
+    long filesize = ftell(fd);
+    rewind(fd);
+    
+    // Ensure program can fit in memory
+    uint8_t* dstbuf = &cpu->memory[start_address];
+    uint16_t max_program_size = (1 << 16) - start_address;
+    if (filesize > max_program_size) {
+        fprintf(stderr, "Error: Program is too large to fit in memory.\n");
+        exit(1);
+    }
+
+    // Copy program into memory
+    fread(dstbuf, 1, filesize, fd);
+
+    // Close the file
+    fclose(fd);
+
+    // Set PC to start of program
+    cpu->PC = start_address;
+}
+
 void execute_instruction(CPU* cpu)
 {
     // Fetch
@@ -63,6 +103,9 @@ void execute_instruction(CPU* cpu)
             break;
         case 0x8D:
             STA_abs(cpu);
+            break;
+        case 0xEA:
+            // NOP (no operation)
             break;
         case 0x00:
             BRK(cpu);
